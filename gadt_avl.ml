@@ -23,6 +23,17 @@ module RawAVLTree = struct
 
   exception Empty_tree
 
+  (* for insertion *)
+  type ('a, _) pos_result =
+    | PSameDepth : ('a, 'd) atree -> ('a, 'd) pos_result
+    | Deeper : ('a, 'd s) atree -> ('a, 'd) pos_result
+
+  (* for deletion *)
+  type ('a, _) neg_result =
+    | NSameDepth  : ('a, 'd s) atree -> ('a, 'd s) neg_result
+    | Shallower : ('a, 'd) atree -> ('a, 'd s) neg_result
+
+
   let rec member : type d. ('a -> 'a -> compare) -> 'a -> ('a, d) atree -> bool =
     fun cmp ele t ->
       match t with
@@ -42,10 +53,8 @@ module RawAVLTree = struct
         iter k;
         in_order_iter iter r
 
-  type ('a, 'd) pos_result =
-    | PSameDepth : ('a, 'd) atree -> ('a, 'd) pos_result
-    | Deeper : ('a, 'd s) atree -> ('a, 'd) pos_result
-
+  (* canonical AVL rotation algorithm now in GADT. Implementation
+     is guaranteed to be correct thanks to GADT *)
   let rotate_left : type d. ('a, d) atree -> 'a -> ('a, d s s) atree -> ('a, d s s) pos_result =
     fun l v r ->
       let Tree (rl, rv, rr, diff) = r in
@@ -102,14 +111,6 @@ module RawAVLTree = struct
           | PSameDepth t' -> PSameDepth (Tree (l, tv, t', diff))
           end
 
-  type k = {f: 'a 'b. 'a -> 'b}
-
-  let kk = {f = fun _ -> assert false}
-
-  type ('a, _) neg_result =
-    | NSameDepth  : ('a, 'd s) atree -> ('a, 'd s) neg_result
-    | Shallower : ('a, 'd) atree -> ('a, 'd s) neg_result
-
   let rec min_elt : type d. ('a, d) atree -> 'a = function
     | Empty -> raise Empty_tree
     | Tree (Empty, tv, _, _) -> tv
@@ -122,7 +123,7 @@ module RawAVLTree = struct
       | Empty -> raise Empty_tree
         (* Weird, it seems that I have to manually write out this constructor!
            Try change the constructor below to wildcard and code won't type check *)
-      | Tree (_, _, _, _) as l ->
+      | Tree (_, _, _, _) ->
         let result = remove_min_elt l in
         match result with
         | NSameDepth t -> NSameDepth (Tree (t, tv, r, Less))
@@ -153,7 +154,6 @@ module RawAVLTree = struct
           | Shallower t -> NSameDepth (Tree (t, tv, r, Less))
       end
 
-  (* I am feeling dizzy *)
   let merge : type m n o. ('a, m) atree -> ('a, n) atree -> (m, n, o) diff -> ('a, o) pos_result =
     fun l r diff ->
       match l, r, diff with
@@ -283,5 +283,4 @@ let () =
   assert (not (member 3 s2));
   assert (member 4 s2);
   assert (member 5 s2);
-
 
