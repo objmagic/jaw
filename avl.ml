@@ -1,5 +1,3 @@
-(* fuck all copyrights and licenses in this universe *)
-
 (* AVL tree with invariants enforced by GADT *)
 
 type compare = LessThan | Equal | GreaterThan
