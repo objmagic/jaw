@@ -123,7 +123,7 @@ module RawAVLTree = struct
       | Empty -> raise Empty_tree
         (* Weird, it seems that I have to manually write out this constructor!
            Try change the constructor below to wildcard and code won't type check *)
-      | Tree (_, _, _, _) ->
+      | Tree _ ->
         let result = remove_min_elt l in
         match result with
         | NSameDepth t -> NSameDepth (Tree (t, tv, r, Less))
