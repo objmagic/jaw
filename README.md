@@ -1,6 +1,6 @@
-This repo contains some interesting GADT code. Most codes are easy,  but some are probably quite complicated to you. Few may be even at jaw-dropping level...
+This repo contains some interesting GADT code pieces. Most codes are easy,  but some are probably quite complicated to you. Few may be even at jaw-dropping level...
 
-GADT is used in the following way
+GADT is used in the following way:
 
 1. enforcing invariants at compile-time so implementation is correct by guarantee
 
