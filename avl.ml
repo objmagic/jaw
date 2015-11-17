@@ -31,6 +31,9 @@ module RawAVLTree = struct
     | NSameDepth  : ('a, 'd s) atree -> ('a, 'd s) neg_result
     | Shallower : ('a, 'd) atree -> ('a, 'd s) neg_result
 
+  let is_empty : type d. ('a, d) atree -> bool = function
+    | Empty -> true
+    | _ -> false
 
   let rec member : type d. ('a -> 'a -> compare) -> 'a -> ('a, d) atree -> bool =
     fun cmp ele t ->
@@ -136,7 +139,7 @@ module RawAVLTree = struct
          We only need to do one pattern matching below and compiler
          is smart enough to tell pattern matching is exhaustive *)
       match l with
-      | Tree (_, _, _, _) as l ->
+      | Tree _ as l ->
         let result = remove_min_elt l in
         match result with
         | NSameDepth t -> NSameDepth (Tree (t, tv, r, More))
@@ -145,7 +148,7 @@ module RawAVLTree = struct
     | Tree (l, tv, r, Same) -> begin
         match l with
         | Empty -> raise Empty_tree
-        | Tree (_, _, _, _) as l ->
+        | Tree _ as l ->
           let result = remove_min_elt l in
           match result with
           | NSameDepth t -> NSameDepth (Tree (t, tv, r, Same))
@@ -158,19 +161,19 @@ module RawAVLTree = struct
       | Empty, Empty, Same -> PSameDepth Empty
       | Empty, _, Less -> PSameDepth r
       | _, Empty, More -> PSameDepth l
-      | Tree (_, _, _, _), Tree (_, _, _, _), Same -> begin
+      | Tree _, Tree _, Same -> begin
         let e = min_elt r and result = remove_min_elt r in
         match result with
         | NSameDepth t -> Deeper (Tree (l, e, t, Same))
         | Shallower t -> Deeper (Tree (l, e, t, More))
         end
-      | Tree (_, _, _, _), Tree (_, _, _, _), Less -> begin
+      | Tree _, Tree _, Less -> begin
         let e = min_elt r and result = remove_min_elt r in
         match result with
         | NSameDepth t -> Deeper (Tree (l, e, t, Less))
         | Shallower t ->  PSameDepth (Tree (l, e, t, Same))
         end
-      | Tree (_, _, _, _), Tree (_, _, _, _), More -> begin
+      | Tree _, Tree _, More -> begin
         let e = min_elt r and result = remove_min_elt r in
         match result with
         | NSameDepth t -> Deeper (Tree (l, e, t, More))
@@ -222,6 +225,7 @@ module type Set = sig
   type t
   type elem
   val empty : t
+  val is_empty : t -> bool
   val member : elem -> t -> bool
   val insert : elem -> t -> t
   val remove : elem -> t -> t
@@ -236,6 +240,8 @@ module Set (X : sig type t val compare : t -> t -> compare end)
   type elem = X.t
 
   let empty = T (RawAVLTree.Empty)
+
+  let is_empty (T t) = RawAVLTree.(is_empty t)
 
   let member e (T t) = RawAVLTree.(member X.compare e t)
 
