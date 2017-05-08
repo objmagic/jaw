@@ -1,34 +1,5 @@
 (* Binomial Heap with invariants enforced by GADT *)
-
-type z = Z_
-type 'n s = S_ : 'n -> 'n s
-type _ nat =
-  | Z : z nat
-  | S : 'n nat -> 'n s nat
-
-(* "('n, 'm) le" means n <= m *)
-type (_, _) le =
-  | LeEq : ('n, 'n) le
-  | LeS : ('n, 'm) le -> ('n, 'm s) le
-
-let rec le_n_s : type n m. (n, m) le -> (n s, m s) le = function
-  | LeEq -> LeEq
-  | LeS hle -> LeS (le_n_s hle)
-
-let rec le_0_n : type n. n nat -> (z, n) le = function
-  | Z -> LeEq
-  | S n -> LeS (le_0_n n)
-
-let rec le_ge_dec : type n m. n nat -> m nat -> [ `InL of (n, m) le | `InR of (m, n) le ] =
-  fun n m ->
-    match n, m with
-    | Z, _ -> `InL (le_0_n m)
-    | _, Z -> `InR (le_0_n n)
-    | S n', S m' ->
-        begin match le_ge_dec n' m' with
-        | `InL hle -> `InL (le_n_s hle)
-        | `InR hge -> `InR (le_n_s hge)
-        end
+open Nat
 
 module type OrderedType =
   sig
@@ -121,13 +92,13 @@ module BinomialHeap (O : OrderedType) : HEAP with type elt = O.t = struct
   let singleton e = T (S Z, TOCons (Some (Node (e, TNil)), TONil))
 
   let merge (T (n1, tov1)) (T (n2, tov2)) =
-    match le_ge_dec n1 n2 with
-    | `InL hle ->
+    match le_total n1 n2 with
+    | Ok hle ->
         begin match merge_tree_opt_vector (padding tov1 hle) tov2 with
         | tov', None -> T (n2, tov')
         | tov', (Some _ as to0) -> T (S n2, TOCons (to0, tov'))
         end
-    | `InR hgt ->
+    | Error hgt ->
         begin match merge_tree_opt_vector tov1 (padding tov2 hgt) with
         | tov', None -> T (n1, tov')
         | tov', (Some _ as to0) -> T (S n1, TOCons (to0, tov'))
