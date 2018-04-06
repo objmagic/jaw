@@ -7,7 +7,7 @@ type z = Z
 type _ s = S
 
 type (_, _, _) add =
-  | Zz: (z, z, z) add
+  | Zz: (z, 'a, 'a) add
   | Zr: ('a, 'b, 'c) add -> ('a, 'b s, 'c s) add
 
 type (_, _, _) mul =
@@ -18,7 +18,8 @@ type absurd = {p: 'a. 'a}
 
 type 'a neg = 'a -> absurd
 
-(* a number n is composite if there exists two numbers >= 2 and their production is n *)
+(* a number n is composite if there exists two numbers >= 2 and
+   their production is n *)
 type 'a composite =
   C : (_ s s, _ s s, 'a) mul -> 'a composite
 
@@ -29,3 +30,5 @@ type two = z s s
 let two_is_prime : two prime = function
   | C (Mn (Mone, Zr Zr _)) -> .
   | C (Mn (Mn _, Zr Zr _)) -> .
+  | C (Mn (Mn (_, _), Zr Zz)) -> .
+  | C (Mn (Mn (_, _), Zz)) -> .
