@@ -32,3 +32,8 @@ let two_is_prime : two prime = function
   | C (Mn (Mn _, Zr Zr _)) -> .
   | C (Mn (Mn (_, _), Zr Zz)) -> .
   | C (Mn (Mn (_, _), Zz)) -> .
+
+type ('a, 'b, 'c) addable = A of ('a, 'b, 'c) add
+type four = z s s s s
+let v : (two, two, four) addable neg = function
+  | A (Zr (Zr _)) -> .
