@@ -98,7 +98,7 @@ module RawAVLTree = struct
             | Same -> Deeper (Tree (t', tv, r, More))
             | Less -> PSameDepth (Tree (t', tv, r, Same))
             end
-          | PSameDepth t' -> PSameDepth (Tree (t', v, r, diff))
+          | PSameDepth t' -> PSameDepth (Tree (t', tv, r, diff))
           end
         | Equal -> PSameDepth t
         | GreaterThan -> begin
