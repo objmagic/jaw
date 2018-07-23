@@ -119,6 +119,7 @@ module RawAVLTree = struct
 
   let rec remove_min_elt : type d. ('a, d s) atree -> ('a, d s) neg_result = function
     | Tree (Empty, _, r, Less) -> Shallower r
+    | Tree (Empty, _, r, Same) -> Shallower r
     | Tree (l, tv, r, Less) -> begin
       match l with
       | Empty -> raise Empty_tree
@@ -145,14 +146,11 @@ module RawAVLTree = struct
         | NSameDepth t -> NSameDepth (Tree (t, tv, r, More))
         | Shallower t -> Shallower (Tree (t, tv, r, Same))
       end
-    | Tree (l, tv, r, Same) -> begin
-        match l with
-        | Empty -> raise Empty_tree
-        | Tree _ as l ->
-          let result = remove_min_elt l in
-          match result with
-          | NSameDepth t -> NSameDepth (Tree (t, tv, r, Same))
-          | Shallower t -> NSameDepth (Tree (t, tv, r, Less))
+    | Tree (Tree(_) as l, tv, r, Same) -> begin
+      let result = remove_min_elt l in
+      match result with
+      | NSameDepth t -> NSameDepth (Tree (t, tv, r, Same))
+      | Shallower t -> NSameDepth (Tree (t, tv, r, Less))
       end
 
   let merge : type m n o. ('a, m) atree -> ('a, n) atree -> (m, n, o) diff -> ('a, o) pos_result =
