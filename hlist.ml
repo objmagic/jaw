@@ -1,7 +1,7 @@
 module HList = struct
   type (_, _) hlist =
     | Empty : ('a, 'a) hlist
-    | :: : 'c * ('a, 'b) hlist -> ('c -> 'a, 'b) hlist
+    | (::) : 'c * ('a, 'b) hlist -> ('c -> 'a, 'b) hlist
 
   let cons : type a b c. c -> (a, b) hlist -> (c -> a, b) hlist =
     fun h tl -> h :: tl
